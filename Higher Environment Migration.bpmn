@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <collaboration id="Collaboration">
+    <participant id="pool1" name="Higher Environment Migration" processRef="higherEnvironmentMigration"></participant>
+  </collaboration>
+  <process id="higherEnvironmentMigration" name="Higher Environment Migration" isExecutable="true">
+    <documentation>Higher Environment Migration.</documentation>
+    <laneSet id="laneSet_higherEnvironmentMigration">
+      <lane id="lane1" name="Start User">
+        <flowNodeRef>startevent1</flowNodeRef>
+        <flowNodeRef>endevent3</flowNodeRef>
+        <flowNodeRef>scripttask1</flowNodeRef>
+        <flowNodeRef>servicetask1</flowNodeRef>
+        <flowNodeRef>exclusivegateway1</flowNodeRef>
+        <flowNodeRef>scripttask2</flowNodeRef>
+        <flowNodeRef>scripttask3</flowNodeRef>
+        <flowNodeRef>servicetask2</flowNodeRef>
+        <flowNodeRef>scripttask4</flowNodeRef>
+      </lane>
+    </laneSet>
+    <startEvent id="startevent1" name="Start" activiti:initiator="startUser">
+      <extensionElements>
+        <activiti:formProperty id="smeUserExpression" name="User expression for the &quot;Subject Matter Expert&quot; lane in the process" type="string" default="role(Subject Matter Expert)" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="stakeholderUserExpression" name="User expression for the Stakeholder lane in the process" type="string" default="role(Stakeholder)" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="stewardUserExpression" name="User expression for the Steward lane in the process" type="string" default="role(Steward)" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="voteWarningTimeDuration" name="Please enter time duration before a voting reminder is send" type="string" default="B5D" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="voteTimeoutDuration" name="Timeout before voting process is forced to continue" type="string" default="B7D" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="voteCompletionPercentage" name="Percentage required to vote before completion" type="long" default="100" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="reviewWarningTimeDuration" name="Time duration before sending reminder in &quot;Review Definion&quot; task" type="string" default="B5D" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="reviewTimeoutDuration" name="Time before review task is forced to continue" type="string" default="B7D" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="reviewCompletionPercentage" name="Percentage of users for &quot;Review Definition&quot; that need to complete their task before continuing" type="long" default="100" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="commentTimeoutDuration" name="Time duration before the comment subprocess is ended" type="string" default="B5D" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="sendVotingActionEmails" name="Send an action email to users that are required to vote in the process" type="boolean" default="false" readable="false" required="true"></activiti:formProperty>
+        <activiti:formProperty id="intakeVocab" name="intakeVocabulary" type="string" default="B7D" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="signifier" name="Name" type="string" default="signifier" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="definition" name="Proposed Definition" default="definition" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="usesrelation" name="Related Assets" default="usesrelation" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="note" name="Reason for proposal" default="note" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="conceptType" name="Type" default="conceptType" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="itemExits" name="itemExits" default="itemExits" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="relationBinaryFactTypeId" default="relationBinaryFactTypeId" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="relationSourceTermId" default="relationSourceTermId" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="relationTargetTermId" default="relationTargetTermId" readable="false"></activiti:formProperty>
+        <activiti:formProperty id="description" name="Description" type="string" default="description" readable="false"></activiti:formProperty>
+      </extensionElements>
+    </startEvent>
+    <endEvent id="endevent3" name="End"></endEvent>
+    <scriptTask id="scripttask1" name="Fetch Attributes of RDE" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>package com.collibra.dgc.core.model.attribute
+loggerComponent.info('Item Name: ' + item.name)
+loggerComponent.info('Item Id: ' + item.id)
+def AttDefListValue=''
+def AttDesListValue='' 
+def AttNotListValue=''
+
+def AttDefList = attributeComponent.getDefinitionsForRepresentation(item.id)
+loggerComponent.info('AttDefList Contains: ' + AttDefList)
+if (AttDefList[0] != null)
+	{
+		AttDefListValue = AttDefList[0].getStringValue()
+	}
+loggerComponent.info('AttDefListValue Contains: ' + AttDefListValue )
+execution.setVariable('definition', AttDefListValue) 
+loggerComponent.info('definition Contains: ' + definition )
+
+def AttDesList = attributeComponent.getDescriptionsForRepresentation(item.id)
+loggerComponent.info('AttDesList Contains: ' + AttDesList)
+if (AttDesList[0] != null)
+	{
+		AttDesListValue = AttDesList[0].getStringValue()
+	}
+loggerComponent.info('AttDesListValue Contains: ' + AttDesListValue )
+execution.setVariable('description', AttDesListValue) 
+loggerComponent.info('description Contains: ' + description )
+
+def AttNotList = attributeComponent.getNotesForRepresentation(item.id)
+loggerComponent.info('AttNotList Contains: ' + AttNotList)
+if (AttNotList[0] != null)
+	{
+		AttNotListValue = AttNotList[0].getStringValue()
+	}
+loggerComponent.info('AttNotListValue Contains: ' + AttNotListValue )
+execution.setVariable('note', AttNotListValue) 
+loggerComponent.info('note Contains: ' + note )
+
+/*Find all the attributes*/
+/*
+def AttList = attributeTypeComponent.getAttributeTypes()
+def AttListSize = AttList.size()
+
+def itemList = []
+itemList.add(item.id)
+def AttListMap = [:]
+
+AttListLabel = attribute.getLabel()
+loggerComponent.info('AttListLabel Contains: ' + AttListLabel )
+	
+
+AttListMap = attributeComponent.getAttributesOfTypesForRepresentation(itemList, AttListLabel)
+loggerComponent.info('AttListMap Contains: ' + AttListMap )
+*/
+
+
+/* Prep steps to find out the Id of 'CCAR Critical Data Domain'*/
+def intakeVocabList = vocabularyComponent.getVocabularies()
+def intakeVocabListSize = intakeVocabList.size()
+loggerComponent.info('intakeVocabList Contains: ' + intakeVocabList)
+String intakeVocabListItem
+
+for (i = 0; i &lt; intakeVocabListSize; i++) 
+{
+	intakeVocabListItem = intakeVocabList[i]
+	loggerComponent.info('intakeVocabListItem Contains: ' + intakeVocabListItem)
+	
+	if ( intakeVocabListItem.equalsIgnoreCase('CCAR Critical Data Domain'))
+	{
+		 intakeVocabListItemId =  intakeVocabList[i].getId()
+		 break
+	}
+}
+
+loggerComponent.info('intakeVocab Contains: ' + intakeVocabListItemId)
+
+
+
+
+/* Find whether the RDE exists as CDE*/
+def temp = []
+def termList = termComponent.findTermsContainingSignifier(item.name,null,null,temp,false,false,null,0,0)
+def termListSize = termList.size()
+loggerComponent.info('termList Contains: ' + termList)
+
+if (termListSize == 2)
+{
+	loggerComponent.info('Item already exists')
+	execution.setVariable('itemExits', 'false') 
+}
+else
+{
+	loggerComponent.info('Item doesnt exist')
+	execution.setVariable('itemExits', 'true')
+
+	/* Find termId(conceptType) of CDE AssetType*/
+	def conceptTypeList = termComponent.findTermsContainingSignifier('Critical Data Element',null,null,temp,false,false,null,0,0)
+	def conceptTypeListSize = conceptTypeList.size()
+	loggerComponent.info('conceptTypeList Contains: ' + conceptTypeList)
+
+	for (i = 0; i &lt;conceptTypeListSize ; i++) 
+	{
+		String conceptTypeListItem = conceptTypeList[i]
+		loggerComponent.info('conceptTypeListItem Contains: ' + conceptTypeListItem)
+		conceptTypeItemId =  conceptTypeList[i].getId()
+		execution.setVariable('conceptType', conceptTypeItemId) 
+		loggerComponent.info('conceptType Contains: ' + conceptType)
+	}
+
+	/*Set other workflow variables*/
+	execution.setVariable('signifier', item.name) 
+	execution.setVariable('intakeVocab', intakeVocabListItemId) 
+	execution.setVariable('usesrelation', '') 
+}</script>
+    </scriptTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="scripttask1"></sequenceFlow>
+    <serviceTask id="servicetask1" name="Create New Term" activiti:class="com.collibra.dgc.core.workflow.activiti.delegate.TermIntakeDelegate">
+      <extensionElements>
+        <activiti:field name="signifier">
+          <activiti:expression><![CDATA[${signifier}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="conceptType">
+          <activiti:expression><![CDATA[${conceptType}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="vocabulary">
+          <activiti:expression><![CDATA[${intakeVocab}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="definition">
+          <activiti:expression><![CDATA[${definition}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="description">
+          <activiti:expression><![CDATA[${description}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="example">
+          <activiti:expression><![CDATA[${example}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="usesrelation">
+          <activiti:expression><![CDATA[${usesrelation}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="note">
+          <activiti:expression><![CDATA[${note}]]></activiti:expression>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow3" sourceRef="scripttask1" targetRef="exclusivegateway1"></sequenceFlow>
+    <exclusiveGateway id="exclusivegateway1" name="Decide whether CDE exists "></exclusiveGateway>
+    <scriptTask id="scripttask2" name="Notify User" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>loggerComponent.info('Requested RDE already exists as CDE')</script>
+    </scriptTask>
+    <sequenceFlow id="flow5" name="Rejected" sourceRef="exclusivegateway1" targetRef="scripttask2">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${itemExits == false}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow6" name="Accepted" sourceRef="exclusivegateway1" targetRef="servicetask1">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${itemExits ==true}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow7" sourceRef="scripttask2" targetRef="endevent3"></sequenceFlow>
+    <scriptTask id="scripttask3" name="Prep Task - Relation" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>/*Find the components of Relation*/
+
+/* Prep steps to find out BinaryfacttypeId of the relation*/
+def temp = []
+def RDEtermList = termComponent.findTermsContainingSignifier('Requested Data Element',null,null,temp,false,false,null,0,0)
+def RDETermId = RDEtermList[0].getId()
+loggerComponent.info('RDETermId: ' +RDETermId)
+
+def CDEtermList = termComponent.findTermsContainingSignifier('Critical Data Element',null,null,temp,false,false,null,0,0)
+def CDETermId = CDEtermList[0].getId()
+loggerComponent.info('CDETermId: ' +CDETermId)
+
+def relationBinaryFactTypeIdList = relationTypeComponent.findRelationTypesContainingRoleAndHeadOrTail('Mapped to',RDETermId,CDETermId)
+loggerComponent.info('relationBinaryFactTypeIdList: ' +relationBinaryFactTypeIdList)
+def relationBinaryFactTypeId = relationBinaryFactTypeIdList[0].getId()
+loggerComponent.info('relationBinaryFactTypeId: ' +relationBinaryFactTypeId)
+execution.setVariable('relationBinaryFactTypeId', relationBinaryFactTypeId) 
+
+/* Find the SourceTypeId*/
+def relationSourceTermId = item.id
+loggerComponent.info('relationSourceTermId: ' +relationSourceTermId)
+execution.setVariable('relationSourceTermId', relationSourceTermId) 
+
+/* Find the targetTypeId*/
+/* A. Prep steps to find out the Id of 'CCAR Critical Data Domain'*/
+def intakeVocabList = vocabularyComponent.getVocabularies()
+def intakeVocabListSize = intakeVocabList.size()
+loggerComponent.info('intakeVocabList Contains: ' + intakeVocabList)
+String intakeVocabListItem
+
+for (i = 0; i &lt; intakeVocabListSize; i++) 
+{
+	intakeVocabListItem = intakeVocabList[i]
+	loggerComponent.info('intakeVocabListItem Contains: ' + intakeVocabListItem)
+	
+	if ( intakeVocabListItem.equalsIgnoreCase('CCAR Critical Data Domain'))
+	{
+		 intakeVocabListItemId =  intakeVocabList[i].getId()
+		 break
+	}
+}
+
+loggerComponent.info('intakeVocab Contains: ' + intakeVocabListItemId)
+
+def termList = termComponent.findTermsContainingSignifier(item.name,intakeVocabListItemId,null,temp,false,false,null,0,0)
+loggerComponent.info('termList Contains: ' + termList)
+def relationTargetTermId = termList[0].getId()
+loggerComponent.info('relationTargetTermId: ' +relationTargetTermId)
+execution.setVariable('relationTargetTermId', relationTargetTermId) </script>
+    </scriptTask>
+    <serviceTask id="servicetask2" name="Create Relation RDE vs CDE" activiti:class="com.collibra.dgc.core.workflow.activiti.delegate.relation.AddRelationDelegate">
+      <extensionElements>
+        <activiti:field name="binaryFactTypeId">
+          <activiti:expression><![CDATA[${relationBinaryFactTypeId}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="sourceTermId">
+          <activiti:expression><![CDATA[${relationSourceTermId}]]></activiti:expression>
+        </activiti:field>
+        <activiti:field name="targetTermId">
+          <activiti:expression><![CDATA[${relationTargetTermId}]]></activiti:expression>
+        </activiti:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="flow9" sourceRef="scripttask3" targetRef="scripttask4"></sequenceFlow>
+    <sequenceFlow id="flow10" sourceRef="servicetask2" targetRef="endevent3"></sequenceFlow>
+    <sequenceFlow id="flow11" sourceRef="servicetask1" targetRef="scripttask3"></sequenceFlow>
+    <scriptTask id="scripttask4" name="Copy Complex Relationship" scriptFormat="groovy" activiti:autoStoreVariables="false">
+      <script>package com.collibra.dgc.core.component.representation
+loggerComponent.info('First Step Done')
+
+/* ************************************************************************ 'Approved Source' ************************************************************************ */
+
+/*Find ComplexRelType of 'Approved Source'*/
+def CRTList = complexRelationTypeComponent.findComplexRelationTypesContainingSignifier('Approved Source')
+
+/*Extract the first item from list varCRTList */
+def CRTListToStr = CRTList[0]
+
+/*Extract the 'Id' portion of the ComplexRelType and print it*/
+def Result = CRTListToStr.getId()
+loggerComponent.info('ComplexRelType is: ' + Result)
+
+/*Fetch all the relationtypes for the ComplexRelType*/
+def var_RTList = complexRelationTypeComponent.getRelationTypes(Result)
+loggerComponent.info('RetType List Contains: ' + var_RTList )
+
+def var_BusCon, var_BusConId
+def var_ReqDE, var_CriDEId
+def var_Sys, var_SysId
+
+/*Loop through var_RTList to find the relationtypes and relationids */
+for (i = 0; i &lt; var_RTList.size(); i++) 
+{
+	def var_RTListRole = var_RTList[i].getRole()
+	loggerComponent.info('var_RTListRole  Contains: ' + var_RTListRole)
+
+	def var_RTListId = var_RTList[i].getId()
+	loggerComponent.info('var_RTListId  Contains: ' + var_RTListId)
+	
+	if (var_RTListRole.equalsIgnoreCase('Business Context'))
+	{
+		var_BusCon = var_RTListRole
+		var_BusConId = var_RTListId
+	
+	}
+	
+	if (var_RTListRole.equalsIgnoreCase('Critical Data Element'))
+	{
+        var_ReqDE = var_RTListRole
+		var_CriDEId = var_RTListId
+	
+	}
+	
+	if (var_RTListRole.equalsIgnoreCase('Approved Source'))
+	{
+        var_Sys = var_RTListRole
+		var_SysId = var_RTListId
+	
+	}
+	
+}
+
+loggerComponent.info('var_BusConId Contains: ' + var_BusConId )
+loggerComponent.info('var_CriDEId Contains: ' + var_CriDEId )
+loggerComponent.info('var_SysId Contains: ' + var_SysId )
+
+/*Prepare a list of Attributes Map*/
+def AttTypeList = complexRelationTypeComponent.getAttributeTypes(Result)
+loggerComponent.info('AttTypeList Contains: ' + AttTypeList )
+
+def AttTypeListSize = AttTypeList.size()
+def complexRelAttId, AttListValue
+
+for (i = 0; i &lt; AttTypeListSize ; i++) 
+{
+	AttTypeListItem = AttTypeList[i]
+	loggerComponent.info('AttTypeListItem  Contains: ' + AttTypeListItem)
+	
+	AttTypeListItemAtt = AttTypeList[i].getAttributes()
+	loggerComponent.info('AttTypeListItemAtt  Contains: ' + AttTypeListItemAtt)
+	
+	AttTypeListItemLabel = AttTypeListItemAtt[0].getLabel()
+	loggerComponent.info('AttTypeListItemLabel  Contains: ' + AttTypeListItemLabel)
+	
+	AttTypeListItemLabelTerm = AttTypeListItemLabel.getId()
+	loggerComponent.info('AttTypeListItemLabelTerm  Contains: ' + AttTypeListItemLabelTerm)
+	
+	complexRelAttId = AttTypeListItemLabelTerm
+}
+
+
+/* ************************************************************************ 'Suggested Source' ************************************************************************ */
+
+
+
+/*Fetch the ComplexRelations of a item Id*/
+def CRCList = complexRelationComponent.getComplexRelations(item.id)
+def CRCListSize = CRCList.size()
+def CRCListItem, CRCListItemId, RelListItem, RelListValue
+
+for (i = 0; i &lt; CRCListSize; i++) 
+{
+	CRCListItem = CRCList[i]
+	loggerComponent.info('CRCListItem Contains: ' + CRCListItem)
+	
+	CRCListItemId = CRCList[i].getId()
+	loggerComponent.info('CRCListItemId Contains: ' + CRCListItemId)
+}
+	
+
+/*Fetch the Relations Map of the ComplexRelType*/
+
+def RelList = complexRelationComponent.getRelations(CRCListItemId)
+def RelListSize = RelList.size()
+
+def complexRelMap = [:]
+def complexRelKey, complexRelValue
+
+def BusCon_complexRelValue, Cri_complexRelValue, Sys_complexRelValue
+
+for (i = 0; i &lt; RelListSize; i++)
+{
+	RelListTarget = RelList[i].getTarget()
+	loggerComponent.info('RelListTarget Contains: ' + RelListTarget)
+	
+	RelListTargetId = RelListTarget.getId()
+	loggerComponent.info('RelListTargetId Contains: ' + RelListTargetId)
+	
+	RelListType = RelList[i].getType()
+	loggerComponent.info('RelListType Contains: ' + RelListType)
+	
+	RelListTypeRole = RelListType.getRole()
+	loggerComponent.info('RelListTypeRole  Contains: ' + RelListTypeRole)
+	
+	if(RelListTypeRole.equalsIgnoreCase('Business Context'))
+	{
+		BusCon_complexRelValue = RelListTargetId
+	}
+	
+	if(RelListTypeRole.equalsIgnoreCase('Requested Data Element'))
+	{
+	    Cri_complexRelValue = relationTargetTermId
+	}
+	
+	if(RelListTypeRole.equalsIgnoreCase('System'))
+	{
+	    Sys_complexRelValue = RelListTargetId
+	}
+	
+}
+
+def BusConList = [] 
+BusConList.add(BusCon_complexRelValue) /*Create List*/
+complexRelMap.put(var_BusConId, BusConList)
+
+def CriDataEleList = [] 
+CriDataEleList.add(Cri_complexRelValue) /*Create List*/
+complexRelMap.put(var_CriDEId, CriDataEleList)
+
+def SysList = [] 
+SysList.add(Sys_complexRelValue) /*Create List*/
+complexRelMap.put(var_SysId, SysList)
+
+loggerComponent.info('complexRelMap Contains: ' + complexRelMap)
+
+
+
+/*Find ComplexRelType of 'Suggested Source'*/
+var_CRTList = complexRelationTypeComponent.findComplexRelationTypesContainingSignifier('Suggested Source')
+
+/*Extract the first item from list varCRTList */
+var_CRTListToStr = var_CRTList[0]
+
+/*Extract the 'Id' portion of the ComplexRelType and print it*/
+var_Result = var_CRTListToStr.getId()
+loggerComponent.info('ComplexRelType is: ' + var_Result)
+
+
+/*Prepare a list of Attributes Map*/
+AttTypeList = complexRelationTypeComponent.getAttributeTypes(var_Result)
+loggerComponent.info('AttTypeList Contains: ' + AttTypeList )
+
+AttTypeListSize = AttTypeList.size()
+
+for (i = 0; i &lt; AttTypeListSize ; i++) 
+{
+	AttTypeListItem = AttTypeList[i]
+	loggerComponent.info('AttTypeListItem  Contains: ' + AttTypeListItem)
+	
+	AttTypeListItemAtt = AttTypeList[i].getAttributes()
+	loggerComponent.info('AttTypeListItemAtt  Contains: ' + AttTypeListItemAtt)
+	
+	AttTypeListItemLabel = AttTypeListItemAtt[0].getLabel()
+	loggerComponent.info('AttTypeListItemLabel  Contains: ' + AttTypeListItemLabel)
+	
+	AttTypeListItemLabelTerm = AttTypeListItemLabel.getId()
+	loggerComponent.info('AttTypeListItemLabelTerm  Contains: ' + AttTypeListItemLabelTerm)
+	
+	AttList = attributeComponent.getAttributesOfTypeForRepresentation(CRCListItemId, AttTypeListItemLabelTerm)
+	loggerComponent.info('AttList Contains: ' + AttList)
+	
+	AttListSize = AttList.size()
+	
+	for (j = 0; j &lt; AttListSize ; j++)
+	{
+			AttListValue = AttList[i].getStringValue()
+			loggerComponent.info('AttListValue  Contains: ' + AttListValue)
+	
+	}
+	
+}
+
+def complexRelAtt = [:]
+def complexRelAttList = []
+complexRelAttList.add(AttListValue)
+complexRelAtt.put(complexRelAttId,complexRelAttList)
+
+loggerComponent.info('complexRelAtt  Contains: ' + complexRelAtt)
+
+complexRelationComponent.addComplexRelation(Result,complexRelMap,complexRelAtt)</script>
+    </scriptTask>
+    <sequenceFlow id="flow12" sourceRef="scripttask4" targetRef="servicetask2"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_Collaboration">
+    <bpmndi:BPMNPlane bpmnElement="Collaboration" id="BPMNPlane_Collaboration">
+      <bpmndi:BPMNShape bpmnElement="pool1" id="BPMNShape_pool1">
+        <omgdc:Bounds height="401.0" width="1551.0" x="30.0" y="20.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="lane1" id="BPMNShape_lane1">
+        <omgdc:Bounds height="401.0" width="1531.0" x="50.0" y="20.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="90.0" y="150.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent3" id="BPMNShape_endevent3">
+        <omgdc:Bounds height="35.0" width="36.0" x="1183.0" y="150.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask1" id="BPMNShape_scripttask1">
+        <omgdc:Bounds height="81.0" width="105.0" x="190.0" y="127.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask1" id="BPMNShape_servicetask1">
+        <omgdc:Bounds height="55.0" width="105.0" x="570.0" y="230.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="exclusivegateway1" id="BPMNShape_exclusivegateway1">
+        <omgdc:Bounds height="40.0" width="40.0" x="370.0" y="147.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask2" id="BPMNShape_scripttask2">
+        <omgdc:Bounds height="55.0" width="105.0" x="570.0" y="140.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask3" id="BPMNShape_scripttask3">
+        <omgdc:Bounds height="78.0" width="105.0" x="760.0" y="219.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="servicetask2" id="BPMNShape_servicetask2">
+        <omgdc:Bounds height="71.0" width="121.0" x="1140.0" y="223.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="scripttask4" id="BPMNShape_scripttask4">
+        <omgdc:Bounds height="75.0" width="105.0" x="960.0" y="221.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="125.0" y="167.0"></omgdi:waypoint>
+        <omgdi:waypoint x="190.0" y="167.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="295.0" y="167.0"></omgdi:waypoint>
+        <omgdi:waypoint x="370.0" y="167.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="410.0" y="167.0"></omgdi:waypoint>
+        <omgdi:waypoint x="570.0" y="167.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="16.0" width="100.0" x="440.0" y="149.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="390.0" y="187.0"></omgdi:waypoint>
+        <omgdi:waypoint x="390.0" y="257.0"></omgdi:waypoint>
+        <omgdi:waypoint x="570.0" y="257.0"></omgdi:waypoint>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="16.0" width="55.0" x="431.0" y="240.0"></omgdc:Bounds>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="675.0" y="167.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1183.0" y="167.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow9" id="BPMNEdge_flow9">
+        <omgdi:waypoint x="865.0" y="258.0"></omgdi:waypoint>
+        <omgdi:waypoint x="960.0" y="258.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow10" id="BPMNEdge_flow10">
+        <omgdi:waypoint x="1200.0" y="223.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1201.0" y="185.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow11" id="BPMNEdge_flow11">
+        <omgdi:waypoint x="675.0" y="257.0"></omgdi:waypoint>
+        <omgdi:waypoint x="760.0" y="258.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow12" id="BPMNEdge_flow12">
+        <omgdi:waypoint x="1065.0" y="258.0"></omgdi:waypoint>
+        <omgdi:waypoint x="1140.0" y="258.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
